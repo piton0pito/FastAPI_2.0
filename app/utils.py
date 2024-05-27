@@ -1,13 +1,15 @@
-import smtplib
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.header import Header
+import smtplib
+from app.config import HOST, USERNAME, PASSWORD, PORT
+
 from random import randint
 from fastapi import Depends
 
 from fastapi import HTTPException
 from datetime import datetime, timedelta
 
-from fastapi import Response
+from app.config import SECRET_KEY, ALGORITHM
 from fastapi.security import OAuth2PasswordBearer
 from jwt import PyJWTError, encode, decode
 from hashlib import sha256
@@ -16,16 +18,16 @@ from sqlmodel import select, Session
 from app.db import get_session
 from app.models import User
 
-SECRET_KEY = "vorona govorit CAR"
-ALGORITHM = "HS256"
+# SECRET_KEY = "vorona_govorit_CAR"
+# ALGORITHM = "HS256"
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-
 credentials_error = HTTPException(
-        status_code=401,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},)
+    status_code=401,
+    detail="Could not validate credentials",
+    headers={"WWW-Authenticate": "Bearer"}, )
+
 
 def create_access_token(data: dict, exp: timedelta = None):
     to_encode = data.copy()
@@ -56,30 +58,33 @@ def hash_password(password: str):
     return sha256(password.encode()).hexdigest()
 
 
-def send_mail(reception_email, text):
-    login = ''
-    password = ''
+def send_mail(reception_email: str, code: str):
+    # create message object instance
+    msg = MIMEMultipart()
 
-    msg = MIMEText(text, 'plain', 'utf-8')
-    msg['Subject'] = Header('Reset password', 'utf-8')
-    msg['From'] = login
+    # setup the parameters of the message
+    password = PASSWORD
+    msg['From'] = USERNAME
     msg['To'] = reception_email
+    msg['Subject'] = "Reset password"
 
-    s = smtplib.SMTP('smtp.yandex.ru', 587, timeout=10)
-    try:
-        s.starttls()
-        s.login(login, password)
-        s.sendmail(msg['From'], reception_email, msg.as_string())
-    except:
-        raise HTTPException(status_code=500, detail='Internal Server Error')
-    finally:
-        s.quit()
+    # add in the message body
+    msg.attach(MIMEText(code, 'plain'))
+
+    # create server
+    server = smtplib.SMTP(f'{HOST}: {PORT}')
+    server.starttls()
+    server.login(msg['From'], password)
+    # send the message via the server.
+    server.sendmail(msg['From'], msg['To'], msg.as_string())
+    server.quit()
     raise HTTPException(status_code=200)
 
 
 def gen_res_key():
     num = str(randint(1, 999999))
-    return ('0' * (6-len(num))) + num
+    return ('0' * (6 - len(num))) + num
+
 
 def get_delta_time(date_1: datetime, date_2: datetime):
     time_difference = date_2 - date_1

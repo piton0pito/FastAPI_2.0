@@ -95,10 +95,9 @@ def reset_password(email: str, session: Session = Depends(get_session)):
     if not temp_user:
         raise HTTPException(status_code=401, detail='Incorrect email')
     code = gen_res_key()
-    # send_mail(temp_user.email, code)
-    print(code)
+    send_mail(temp_user.email, code)
+    # print(code)
     temp_user.sqlmodel_update({'temp_data': code})
-    print(temp_user)
     session.add(temp_user)
     session.commit()
     session.refresh(temp_user)

@@ -1,7 +1,8 @@
-from sqlmodel import SQLModel, Field, UniqueConstraint
+from sqlmodel import SQLModel, Field
 from typing import Optional
 from datetime import datetime
 from hashlib import sha256
+from pydantic import EmailStr
 
 
 class User(SQLModel, table=True):

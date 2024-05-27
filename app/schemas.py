@@ -1,9 +1,9 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from datetime import datetime, date
 
 
 class UserCreate(BaseModel):
-    email: str = Field(default='Email')  # почта
+    email: EmailStr = Field(default='Email')  # почта
     first_name: str = Field(default='Имя')  # имя
     last_name: str = Field(default='Отчество')  # отчество
     surname: str = Field(default='Фамилия')  # фамилия
@@ -14,13 +14,13 @@ class UserCreate(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    email: str = Field(default='Email')
+    email: EmailStr = Field(default='Email')
     password: str = Field(default='Password')
     complete_password: str = Field(default='Confirm the password')
 
 
 class CreateNewPassword(BaseModel):
-    email: str = Field(default='Email')
+    email: EmailStr = Field(default='Email')
     code: str = Field(default='Verify code')
     password: str = Field(default='Password')
     complete_password: str = Field(default='Confirm the password')

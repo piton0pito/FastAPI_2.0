@@ -1,28 +1,28 @@
-import pyjokes
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
 
-def generate_random_joke(language='ru'):
-    joke = pyjokes.get_joke(language=language)
-    print(joke)
+from app.config import PASSWORD, USERNAME, HOST, PORT
 
-def generate_multiple_jokes(count=1, language='ru'):
-    jokes = pyjokes.get_jokes(count=count, language=language)
-    for joke in jokes:
-        print(joke)
-        print('-' * 30)
+def send_mail(reception_email: str, code: str):
+    # create message object instance
+    msg = MIMEMultipart()
 
-def main():
-    print("Welcome to the Joke Generator!")
-    print("Choose an option:")
-    print("1. Generate a random joke")
-    print("2. Generate multiple jokes")
-    choice = input("Enter your choice (1/2): ")
+    # setup the parameters of the message
+    password = PASSWORD
+    msg['From'] = USERNAME
+    msg['To'] = reception_email
+    msg['Subject'] = "Reset password"
 
-    if choice == '1':
-        language = input("Enter the language code (default: en): ")
-        generate_random_joke(language)
-    elif choice == '2':
-        count = int(input("Enter the number of jokes to generate: "))
-        language = input("Enter the language code (default: en): ")
-        generate_multiple_jokes(count, language)
-    else:
-        print("Invalid choice. Exiting...")
+    # add in the message body
+    msg.attach(MIMEText(code, 'plain'))
+
+    # create server
+    server = smtplib.SMTP(f'{HOST}: {PORT}')
+    server.starttls()
+    server.login(msg['From'], password)
+    # send the message via the server.
+    server.sendmail(msg['From'], msg['To'], msg.as_string())
+    server.quit()
+
+
