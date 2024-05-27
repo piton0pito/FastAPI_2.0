@@ -60,17 +60,18 @@ class Rent(SQLModel, table=True):
     user_id: int = Field(foreign_key='user.id')  # id_пользователя
     car_id: int = Field(foreign_key='car.id')  # id_машины
     data_rent_start: datetime = Field(default_factory=datetime.utcnow)  # дата аренды начало
-    data_rent_end: datetime = None  # дата аренды конец
+    data_rent_end: datetime = Field(nullable=True, default=None)  # дата аренды конец
     status: str = Field(default='continues')  # 'continues' или 'end'
 
     def end(self):
         self.status = 'end'
+        self.data_rent_end = datetime.utcnow()
 
 
 class Payment(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True, default=None)
-    rent_id: int = Field(default=None, foreign_key='rent.id')  # id_аренды
-    user_id: int = Field(default=None, foreign_key='user.id')  # id_пользователя
+    rent_id: int = Field(foreign_key='rent.id')  # id_аренды
+    user_id: int = Field(foreign_key='user.id')  # id_пользователя
     prise: int
     card_number: str  # номер карты
     # valid_thru: datetime  # дата валидности банковской карты

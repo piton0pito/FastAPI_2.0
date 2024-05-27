@@ -22,15 +22,10 @@ ALGORITHM = "HS256"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-credentials_error = HTTPException(status_code=401,
-                      detail='The credentials could not be verified',
-                      headers={'WWW-Authenticate': 'Bearer'}
-                      )
-
-def create_cookie(response: Response, token: str):
-    response.set_cookie(key="session", value=token)
-    return {"message": "Come to the dark side, we have cookies"}
-
+credentials_error = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},)
 
 def create_access_token(data: dict, exp: timedelta = None):
     to_encode = data.copy()
@@ -46,7 +41,7 @@ def create_access_token(data: dict, exp: timedelta = None):
 def verify_access_token(token: str = Depends(oauth2_scheme), session: Session = Depends(get_session)):
     try:
         payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str = payload.get('sub')
+        user_id: str = payload.get("sub")
         if user_id is None:
             raise credentials_error
         user = session.exec(select(User).where(User.id == user_id)).first()

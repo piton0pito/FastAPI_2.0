@@ -14,7 +14,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 @router.post('/login/')
-def login_user(response: Response,
+async def login_user(response: Response,
                      session: Session = Depends(get_session),
                      data: OAuth2PasswordRequestForm = Depends()
                      ):
@@ -25,10 +25,9 @@ def login_user(response: Response,
                             detail='Incorrect email or password',
                             headers={"WWW-Authenticate": "Bearer"}
                             )
-    access_token = create_access_token(data={'sub': user.id})
-    print(access_token)
-    response.set_cookie(key='Car_share_access_token', value=access_token, httponly=True)
-    raise HTTPException(status_code=200)
+    access_token = create_access_token(data={"sub": user.id})
+    response.set_cookie(key="access_token", value=access_token, httponly=True)
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.post('/register/')
@@ -67,9 +66,9 @@ def login_user_for_token(response: Response,
                             headers={"WWW-Authenticate": "Bearer"}
                             )
     access_token = create_access_token(data={'sub': user.id})
-    print(access_token)
-    response.set_cookie(key='Car_share_access_token', value=access_token)
-    raise HTTPException(status_code=200)
+    access_token = create_access_token(data={"sub": user.id})
+    response.set_cookie(key="access_token", value=access_token, httponly=True)
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.put('/update/')
@@ -77,12 +76,13 @@ def update_user_data(data: UserUpdate,
                            session: Session = Depends(get_session),
                            user: User = Depends(verify_access_token)
                            ):
-    if session.exec(select(User).where(User.email == data.email)):
+    if session.exec(select(User).where(User.email == data.email)).first():
         raise HTTPException(status_code=400, detail='Email is busy')
     if data.password != data.complete_password:
         raise HTTPException(status_code=401, detail='Incorrect password')
-    user.sqlmodel_update({'email': data.email})
-    user.sqlmodel_update({'hash_password': hash_password(data.password)})
+    user.email = data.email
+    user.hash_password = hash_password(data.password)
+    print(user)
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -124,5 +124,4 @@ def create_new_password(data: CreateNewPassword, session: Session = Depends(get_
 
 @router.post("/cookie-and-object/")
 def create_cookie(response: Response, data):
-    response.set_cookie(key="fakesession", value=data)
-    return {"message": "Come to the dark side, we have cookies"}
+   create_cookie(data)

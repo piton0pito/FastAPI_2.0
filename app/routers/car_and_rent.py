@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException, Response, Depends
 from sqlmodel import Session, select
+from datetime import datetime
 
 from app.db import get_session
 from app.models import Car, User, Rent, Payment
-from app.schemas import GetCar, CarGeoDataUpdate, AddCar
+from app.schemas import GetCar, CarGeoDataUpdate, AddCar, PaymentCreate
 from app.utils import verify_access_token, get_delta_time
 
 router = APIRouter(tags=['car_and_rent'],
@@ -15,19 +16,19 @@ def get_car(data: GetCar, session: Session = Depends(get_session)):
     pog = 0.0000000
     cars = {}
     while not cars:
-        if data.brand and data.model:
+        if data.brand != 'None' and data.model != 'None':
             cars = session.exec(select(Car).where(Car.brand == data.brand).where(Car.model == data.model).where(
                 Car.latitude >= data.latitude - pog).where(Car.latitude <= data.latitude + pog).where(
-                Car.longitude >= data.longitude - pog).where(Car.longitude <= data.longitude + pog)).all()
-        elif data.brand:
+                Car.longitude >= data.longitude - pog).where(Car.longitude <= data.longitude + pog)).one()
+        elif data.brand != 'None':
             cars = session.exec(
                 select(Car).where(Car.brand == data.brand).where(Car.latitude >= data.latitude - pog).where(
                     Car.latitude <= data.latitude + pog).where(Car.longitude >= data.longitude - pog).where(
-                    Car.longitude <= data.longitude + pog)).all()
+                    Car.longitude <= data.longitude + pog)).one()
         else:
             cars = cars = session.exec(
                 select(Car).where(Car.latitude >= data.latitude - pog).where(Car.latitude <= data.latitude + pog).where(
-                    Car.longitude >= data.longitude - pog).where(Car.longitude <= data.longitude + pog)).all()
+                    Car.longitude >= data.longitude - pog).where(Car.longitude <= data.longitude + pog)).one()
         pog += 0.0002000
         print(pog)
     return cars
@@ -47,25 +48,31 @@ def rent_car(car_number: str, session: Session = Depends(get_session), user: Use
         raise HTTPException(status_code=429, detail="You didn't complete the last trip. To continue, complete the trip")
 
     car.no_active()
-    rent = Rent(id_user=user.id, car_id=car.id)
-    car.sqlmodel_update()
+    rent = Rent(user_id=user.id, car_id=car.id)
+    session.add(car)
+    session.add(rent)
+    session.commit()
+    session.refresh(car)
     raise HTTPException(status_code=200)
 
 
 @router.put('/end_rent_car/')
-def end_rent_car(data: Payment, user: User = Depends(verify_access_token), session: Session = Depends(get_session)):
+def end_rent_car(data: PaymentCreate, user: User = Depends(verify_access_token), session: Session = Depends(get_session)):
     rent = session.exec(select(Rent).where(Rent.user_id == user.id).where(Rent.data_rent_end == None)).first()
-    car = session.get(Car, rent.car_id)
     if not rent:
         raise HTTPException(status_code=400, detail="You don't have any trips started")
+    car = session.exec(select(Car).where(Car.id == rent.car_id)).first()
     rent.end()
+    car.active()
     payment = Payment(rent_id=rent.id, user_id=user.id,
                       prise=(car.price_order * get_delta_time(rent.data_rent_start, rent.data_rent_end)),
                       card_number=data.card_number)
     session.add(rent)
+    session.add(car)
     session.add(payment)
     session.commit()
     session.refresh(rent)
+    session.refresh(car)
     # здесь должна быть функция для обновления геолокации машины
     raise HTTPException(status_code=200)
 

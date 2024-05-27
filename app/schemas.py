@@ -1,43 +1,43 @@
 from pydantic import BaseModel, Field
-from datetime import datetime
+from datetime import datetime, date
 
 
 class UserCreate(BaseModel):
-    email: str  # почта
-    first_name: str  # имя
-    last_name: str  # отчество
-    surname: str  # фамилия
+    email: str = Field(default='Email')  # почта
+    first_name: str = Field(default='Имя')  # имя
+    last_name: str = Field(default='Отчество')  # отчество
+    surname: str = Field(default='Фамилия')  # фамилия
     license: str = Field(min_length=10, max_length=10)  # права
-    password: str
-    complete_password: str
+    password: str = Field(default='Password')
+    complete_password: str = Field(default='Confirm the password')
 
 
 
 class UserUpdate(BaseModel):
-    email: str
-    password: str
-    complete_password: str
+    email: str = Field(default='Email')
+    password: str = Field(default='Password')
+    complete_password: str = Field(default='Confirm the password')
 
 
 class CreateNewPassword(BaseModel):
-    email: str
-    code: str
-    password: str
-    complete_password: str
+    email: str = Field(default='Email')
+    code: str = Field(default='Verify code')
+    password: str = Field(default='Password')
+    complete_password: str = Field(default='Confirm the password')
 
 
 class AddCar(BaseModel):
-    brand: str  # марка авто
-    model: str  # модель авто
-    car_number: str  # гос_номер
-    price_order: int  # цена аренды
+    brand: str = Field(default='ваз')  # марка авто
+    model: str = Field(default='ока')  # модель авто
+    car_number: str = Field(default='ам777р777')  # гос_номер
+    price_order: int = Field(default=50)  # цена аренды
     latitude: float  # широта
     longitude: float  # долгота
 
 
 class GetCar(BaseModel):
-    brand: str = Field(default=None) # марка авто
-    model: str = Field(default=None) # модель авто
+    brand: str = Field(default='None') # марка авто
+    model: str = Field(default='None') # модель авто
     latitude: float  # широта
     longitude: float  # долгота
 
@@ -55,5 +55,6 @@ class CarPriseUpdate(BaseModel):
 
 class PaymentCreate(BaseModel):
     card_number: str  # номер карты
-    valid_thru: datetime    # дата валидности банковской карты
-    svv: str
+    valid_thru_m: datetime = Field(default=datetime.now().month)  # дата валидности банковской карты
+    valid_thru_y: datetime = Field(default=datetime.now().year)  # дата валидности банковской карты
+    svv: str = Field(default='000')
