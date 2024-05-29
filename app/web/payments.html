@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}
+	<title>Оплата</title>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="text-center">Оплата</h1>
+            {% if msg %}
+                <div class="alert alert-success" role="alert">
+                    {{msg}}
+                </div>
+            {% endif %}
+            {% for error in errors %}
+                    <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                    </div>
+            {% endfor %}
+        <form method="POST">
+            <div class="mb-3">
+              <label for="card_number" class="form-label">Номер карты:</label>
+              <input type="text" required class="form-control" name="card_number" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="valid_thru_m" class="form-label">Месяц:</label>
+                <input type="text" required class="form-control" name="valid_thru_m" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="valid_thru_y" class="form-label">Год:</label>
+                <input type="text" required class="form-control" name="valid_thru_y" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+              <label for="svv" class="form-label">SVV:</label>
+              <input type="password" required class="form-control" name="svv">
+            </div>
+            <button type="submit" class="btn btn-primary">Оплатить</button>
+        </form>
+{% endblock %}
