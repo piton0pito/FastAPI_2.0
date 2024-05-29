@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}
+	<title>Регистрация</title>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="text-center">Регистрация</h1>
+                {% for error in errors %}
+                        <div class="alert alert-danger" role="alert">
+                                {{ error }}
+                        </div>
+                {% endfor %}
+        <form method="POST">
+            <div class="mb-3">
+              <label for="email" class="form-label">Почта:</label>
+              <input type="email" required class="form-control" name="email" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="first_name" class="form-label">Имя:</label>
+                <input type="text" required class="form-control" name="first_name" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="last_name" class="form-label">Отчество:</label>
+                <input type="text" required class="form-control" name="last_name" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="surname" class="form-label">Фамилия:</label>
+                <input type="text" required class="form-control" name="surname" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="license" class="form-label">Лицензия:</label>
+                <input type="text" required class="form-control" name="license" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Пароль:</label>
+              <input type="password" required class="form-control" name="password">
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Повторить пароль:</label>
+                <input type="password" required class="form-control" name="complete_password">
+              </div>
+            <button type="submit" class="btn btn-primary">Создать</button>
+        </form>
+    </div>
+{% endblock %}
