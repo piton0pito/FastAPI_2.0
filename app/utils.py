@@ -39,7 +39,7 @@ def create_access_token(data: dict, exp: timedelta = None):
     if exp:
         expire = datetime.utcnow() + exp
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.utcnow() + timedelta(minutes=60)
     to_encode.update({"exp": expire})
     encoded_jwt = encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
