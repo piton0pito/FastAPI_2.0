@@ -1,15 +1,26 @@
 from pydantic import BaseModel, Field, EmailStr
-from datetime import datetime, date
+from pydantic_extra_types.phone_numbers import PhoneNumber
+from datetime import datetime
 
 
 class UserCreate(BaseModel):
     email: EmailStr = Field(default='Email')  # почта
+    phone: PhoneNumber = Field(default='+78005553535')
     first_name: str = Field(default='Имя')  # имя
     last_name: str = Field(default='Отчество')  # отчество
     surname: str = Field(default='Фамилия')  # фамилия
     license: str = Field(min_length=10, max_length=10)  # права
     password: str = Field(default='Password')
     complete_password: str = Field(default='Confirm the password')
+
+
+class GetUser(BaseModel):
+    email: EmailStr = Field(default='Email')  # почта
+    first_name: str = Field(default='Имя')  # имя
+    last_name: str = Field(default='Отчество')  # отчество
+    surname: str = Field(default='Фамилия')  # фамилия
+    license: str = Field(min_length=10, max_length=10)  # права
+
 
 
 

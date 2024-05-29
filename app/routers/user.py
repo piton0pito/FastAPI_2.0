@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 
 from app.db import get_session
 from app.models import User
-from app.schemas import UserCreate, UserUpdate, CreateNewPassword
+from app.schemas import UserCreate, UserUpdate, CreateNewPassword, GetUser
 from app.utils import create_access_token, verify_access_token, hash_password, gen_res_key, send_mail
 
 router = APIRouter(tags=['user'],
@@ -121,6 +121,6 @@ def create_new_password(data: CreateNewPassword, session: Session = Depends(get_
     raise HTTPException(status_code=200)
 
 
-@router.post("/cookie-and-object/")
-def create_cookie(response: Response, data):
-   create_cookie(data)
+@router.get('/me/')
+def user_me(user: GetUser = Depends(verify_access_token)):
+    return user

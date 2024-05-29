@@ -1,10 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends
+from fastapi.responses import FileResponse
 from sqlmodel import Session, select
 
 from app.models import User, Car
 from app.db import get_session
 from app.schemas import AddCar
-from app.utils import verify_access_token
+from app.utils import verify_access_token, get_xlsx
 
 router = APIRouter(prefix='/admin', tags=['admin'],
                    responses={404: {"description": "Not found"}})
@@ -25,12 +26,32 @@ def get_verify_user(user: User = Depends(verify_access_token), session: Session 
     return users
 
 
+@router.get('/get_verify_user/xlsx')
+def get_verify_user(user: User = Depends(verify_access_token), session: Session = Depends(get_session)):
+    if user.role != 'super_user':
+        raise HTTPException(status_code=403)
+    name = 'verify_users'
+    users = session.exec(select(User).where(User.role == 'verify')).all()
+    get_xlsx(users, f'{name}.xlsx')
+    return FileResponse(path=f'{name}.xlsx', filename=f'{name}.xlsx', media_type='multipart/form-data')
+
+
 @router.get('/get_no_verify_user/')
 def get_no_verify_user(su_user: User = Depends(verify_access_token), session: Session = Depends(get_session)):
     if su_user.role != 'super_user':
         raise HTTPException(status_code=403)
     users = session.exec(select(User).where(User.role == 'no_verify')).all()
     return users
+
+
+@router.get('/get_no_verify_user/xlsx')
+def get_no_verify_user_xlsx(su_user: User = Depends(verify_access_token), session: Session = Depends(get_session)):
+    if su_user.role != 'super_user':
+        raise HTTPException(status_code=403)
+    name = 'no_verify_users'
+    users = session.exec(select(User).where(User.role == 'no_verify')).all()
+    get_xlsx(users, f'{name}.xlsx')
+    return FileResponse(path=f'{name}.xlsx', filename=f'{name}.xlsx', media_type='multipart/form-data')
 
 
 @router.get('/verify_user/{user_id}')
@@ -90,7 +111,6 @@ def del_user(user_id: int, su_user: User = Depends(verify_access_token), session
         raise HTTPException(status_code=404, detail='User not found')
     session.delete(user)
     session.commit()
-    session.refresh(user)
     raise HTTPException(status_code=200)
 
 

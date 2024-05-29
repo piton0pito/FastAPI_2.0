@@ -1,7 +1,12 @@
+import os
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
+
+import openpyxl
+
 from app.config import HOST, USERNAME, PASSWORD, PORT
+from openpyxl import Workbook
 
 from random import randint
 from fastapi import Depends
@@ -90,3 +95,20 @@ def get_delta_time(date_1: datetime, date_2: datetime):
     time_difference = date_2 - date_1
     minutes_difference = time_difference.seconds / 60 + time_difference.microseconds / 1000000 / 60
     return int(minutes_difference)
+
+
+def get_xlsx(users, file_name):
+    # Create a workbook and select the active sheet
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    # Write the headers
+    headers = ['id', 'hash_password', 'surname', 'date_reg', 'email', 'role', 'first_name', 'last_name', 'license']
+    sheet.append(headers)
+    # Write the users
+    for user in users:
+        user = dict(user)
+        row = [user[header] for header in headers]
+        sheet.append(row)
+    # Save the workbook
+    workbook.save(file_name)
+
