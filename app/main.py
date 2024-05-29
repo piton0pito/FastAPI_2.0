@@ -14,6 +14,9 @@ app.include_router(user.router)
 app.include_router(car_and_rent.router)
 app.include_router(payment.router)
 app.include_router(admin.router)
+app.include_router(web_cars.router)
+app.include_router(web_users.router)
+app.include_router(web_login.router)
 
 
 @app.get('/mem/')
