@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}
+	<title>{{ car.brand }} {{ car.model }}</title>
+{% endblock %}
+
+{% block content %}
+	<div class="container">
+		<h1>Информация</h1>
+		<table class="table">
+		  <tbody>
+   			 <tr>
+     			 <th scope="row">Бренд</th>
+     			 <td>{{car.brand}}</td>
+			 </tr>
+			 <tr>
+      			<th scope="row">Модель</th>
+      			<td>{{car.model}}</td>
+			 </tr>
+			 <tr>
+      			<th scope="row">Широта</th>
+      			<td colspan="2">{{car.latitude}}</td>
+			 </tr>
+			 <tr>
+      			<th scope="row">Долгота</th>
+      			<td colspan="2">{{car.longitude}}</td>
+			 </tr>
+			 <tr>
+      			<th scope="row">Номер</th>
+      			<td colspan="2">{{car.car_number}}</td>
+			 </tr>
+			 <tr>
+      			<th scope="row">Цена</th>
+      			<td colspan="2">{{car.price_order}}</td>
+			 </tr>
+			 <tr>
+      			<th scope="row">Статус</th>
+      			<td colspan="2">{{car.status}}</td>
+			 </tr>
+		  </tbody>
+		</table>
+	</div>
+{% endblock %}
