@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}
+    <title>Главная страница</title>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h3 class="text-center">Главная страница</h3>
+        <div class="row">
+            {% for car in cars %}
+                <div class="col">
+                    {% include 'card.html' %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
