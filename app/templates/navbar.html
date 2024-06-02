@@ -10,17 +10,32 @@
             <a class="nav-link active" aria-current="page" href="/">Главная</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/register">Регистрация</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/login">Вход</a>
-          </li>
-          <li class="nav-item">
             <a class="nav-link" href="/payments">Оплата</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/start_rent">Аренда</a>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="/" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Аренда
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/start_rent">Начать аренду</a></li>
+              <li><a class="dropdown-item" href="/end_rent">Закончить аренду</a></li>
+            </ul>
           </li>
+          {% if request.cookies.get("access_token") %}
+          <li class="nav-item">
+            <a href="/logout" class="btn btn-secondary">Выход</a>
+          </li>
+          {% else %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="/" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Вход
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/register">Регистрация</a></li>
+              <li><a class="dropdown-item" href="/login">Войти</a></li>
+            </ul>
+          </li>
+          {% endif %}
           <li class="nav-item">
             <a class="nav-link" href="/docs">Docs</a>
           </li>
