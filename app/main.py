@@ -7,6 +7,10 @@ from sqlmodel import SQLModel
 
 from app.utils import send_mail
 
+from app.web import cars as web_cars
+from app.web import users as web_users
+from app.web import login as web_login
+
 SQLModel.metadata.create_all(engine)
 
 app = FastAPI()
