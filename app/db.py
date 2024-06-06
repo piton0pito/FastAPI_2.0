@@ -1,6 +1,6 @@
 from fastapi.security import HTTPBasic
 from sqlmodel import Session
-from sqlalchemy import create_engine
+from sqlmodel import create_engine
 
 engine = create_engine("sqlite:///./data_base.db")
 security = HTTPBasic()

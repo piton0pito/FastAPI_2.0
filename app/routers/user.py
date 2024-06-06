@@ -32,8 +32,8 @@ async def login_user(response: Response,
 
 @router.post('/register/')
 def reg_user(user: UserCreate,
-                   session: Session = Depends(get_session)
-                   ):
+             session: Session = Depends(get_session)
+             ):
     temp_user = session.exec(select(User).where(User.email == user.email)).first()
     if temp_user:
         raise HTTPException(status_code=400,
@@ -65,7 +65,6 @@ def login_user_for_token(response: Response,
                             detail='Incorrect email or password',
                             headers={"WWW-Authenticate": "Bearer"}
                             )
-    access_token = create_access_token(data={'sub': user.id})
     access_token = create_access_token(data={"sub": user.id})
     response.set_cookie(key="access_token", value=access_token, httponly=True)
     return {"access_token": access_token, "token_type": "bearer"}
@@ -73,16 +72,16 @@ def login_user_for_token(response: Response,
 
 @router.put('/update/')
 def update_user_data(data: UserUpdate,
-                           session: Session = Depends(get_session),
-                           user: User = Depends(verify_access_token)
-                           ):
+                     session: Session = Depends(get_session),
+                     user: User = Depends(verify_access_token)
+                     ):
     if session.exec(select(User).where(User.email == data.email)).first():
         raise HTTPException(status_code=400, detail='Email is busy')
     if data.password != data.complete_password:
         raise HTTPException(status_code=401, detail='Incorrect password')
     user.email = data.email
     user.hash_password = hash_password(data.password)
-    print(user)
+    # print(user)
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -96,12 +95,12 @@ def reset_password(email: str, session: Session = Depends(get_session)):
         raise HTTPException(status_code=401, detail='Incorrect email')
     code = gen_res_key()
     send_mail(temp_user.email, code)
-    # print(code)
+    print(code)
     temp_user.sqlmodel_update({'temp_data': code})
     session.add(temp_user)
     session.commit()
     session.refresh(temp_user)
-    raise HTTPException(status_code=200)
+    raise HTTPException(status_code=201)
 
 
 @router.put('/create_new_password/')
@@ -122,5 +121,7 @@ def create_new_password(data: CreateNewPassword, session: Session = Depends(get_
 
 
 @router.get('/me/')
-def user_me(user: GetUser = Depends(verify_access_token)):
+def user_me(temp_user: User = Depends(verify_access_token)):
+    user = GetUser(email=temp_user.email, first_name=temp_user.first_name, last_name=temp_user.last_name,
+                   surname=temp_user.surname, license=temp_user.license)
     return user

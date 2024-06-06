@@ -21,7 +21,8 @@ from hashlib import sha256
 from sqlmodel import select, Session
 
 from app.db import get_session
-from app.models import User
+from app.models import User, Car
+from app.schemas import GetUser, GetCar
 
 # SECRET_KEY = "vorona_govorit_CAR"
 # ALGORITHM = "HS256"
@@ -83,7 +84,6 @@ def send_mail(reception_email: str, code: str):
     # send the message via the server.
     server.sendmail(msg['From'], msg['To'], msg.as_string())
     server.quit()
-    raise HTTPException(status_code=200)
 
 
 def gen_res_key():
@@ -102,7 +102,7 @@ def get_xlsx(users, file_name):
     workbook = openpyxl.Workbook()
     sheet = workbook.active
     # Write the headers
-    headers = ['id', 'hash_password', 'surname', 'date_reg', 'email', 'role', 'first_name', 'last_name', 'license']
+    headers = ['id', 'surname', 'date_reg', 'email', 'role', 'first_name', 'last_name', 'license']
     sheet.append(headers)
     # Write the users
     for user in users:
@@ -112,3 +112,29 @@ def get_xlsx(users, file_name):
     # Save the workbook
     workbook.save(file_name)
 
+#
+# def get_car(data: GetCar, session: Session = Depends(get_session)):
+#     pog = 0.0000000
+#     cars = {}
+#     while not cars:
+#         if data.brand != 'None' and data.model != 'None':
+#             cars = session.exec(select(Car).where(Car.brand == data.brand).where(Car.model == data.model).where(
+#                 Car.latitude >= data.latitude - pog).where(Car.latitude <= data.latitude + pog).where(
+#                 Car.longitude >= data.longitude - pog).where(Car.longitude <= data.longitude + pog)).one()
+#         elif data.brand != 'None':
+#             cars = session.exec(
+#                 select(Car).where(Car.brand == data.brand).where(Car.latitude >= data.latitude - pog).where(
+#                     Car.latitude <= data.latitude + pog).where(Car.longitude >= data.longitude - pog).where(
+#                     Car.longitude <= data.longitude + pog)).one()
+#         else:
+#             cars = cars = session.exec(
+#                 select(Car).where(Car.latitude >= data.latitude - pog).where(Car.latitude <= data.latitude + pog).where(
+#                     Car.longitude >= data.longitude - pog).where(Car.longitude <= data.longitude + pog)).one()
+#         pog += 0.0002000
+#         print(pog)
+#     return cars
+
+
+deta = GetCar(brand='ваз', latitude=0.1111111, longitude=0.1111111)
+
+# print(get_car(deta))

@@ -11,33 +11,18 @@ router = APIRouter(tags=['car_and_rent'],
                    responses={404: {"description": "Not found"}})
 
 
-@router.get('/get_car/')
-def get_car(data: GetCar, session: Session = Depends(get_session)):
-    pog = 0.0000000
-    cars = {}
-    while not cars:
-        if data.brand != 'None' and data.model != 'None':
-            cars = session.exec(select(Car).where(Car.brand == data.brand).where(Car.model == data.model).where(
-                Car.latitude >= data.latitude - pog).where(Car.latitude <= data.latitude + pog).where(
-                Car.longitude >= data.longitude - pog).where(Car.longitude <= data.longitude + pog)).one()
-        elif data.brand != 'None':
-            cars = session.exec(
-                select(Car).where(Car.brand == data.brand).where(Car.latitude >= data.latitude - pog).where(
-                    Car.latitude <= data.latitude + pog).where(Car.longitude >= data.longitude - pog).where(
-                    Car.longitude <= data.longitude + pog)).one()
-        else:
-            cars = cars = session.exec(
-                select(Car).where(Car.latitude >= data.latitude - pog).where(Car.latitude <= data.latitude + pog).where(
-                    Car.longitude >= data.longitude - pog).where(Car.longitude <= data.longitude + pog)).one()
-        pog += 0.0002000
-        print(pog)
-    return cars
+# @router.get('/get_car/')
+# def get_car_temp(data: GetCar, session: Session = Depends(get_session)):
+#     get_car()
+#     return cars
 
 
 @router.post('/rent_car/')
 def rent_car(car_number: str, session: Session = Depends(get_session), user: User = Depends(verify_access_token)):
     if user.role == 'no_verify':
         raise HTTPException(status_code=403, detail='You have not passed verification.')
+    if user.role == 'BAN':
+        raise HTTPException(status_code=403, detail='You are BANed!!!')
     car = session.exec(select(Car).where(Car.car_number == car_number)).first()
     if session.exec(select(Payment).where(Payment.user_id == user.id).where(Payment.status == 'waiting')).first():
         raise HTTPException(status_code=402,
@@ -61,6 +46,8 @@ def end_rent_car(data: PaymentCreate, user: User = Depends(verify_access_token),
     rent = session.exec(select(Rent).where(Rent.user_id == user.id).where(Rent.data_rent_end == None)).first()
     if not rent:
         raise HTTPException(status_code=400, detail="You don't have any trips started")
+    if user.role == 'BAN':
+        raise HTTPException(status_code=403, detail='You are BANed!!!')
     car = session.exec(select(Car).where(Car.id == rent.car_id)).first()
     rent.end()
     car.active()
