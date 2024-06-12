@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi.responses import RedirectResponse
 
 from app.db import engine
 from app.routers import user, car_and_rent, payment, admin
@@ -31,6 +32,10 @@ def get():
 def schedule_mail(email: str, code: str, tasks: BackgroundTasks):
     send_mail(email, code)
     raise HTTPException(status_code=200, detail='Email has been scheduled')
+
+@app.get('/random_meme/')
+def meme():
+    return RedirectResponse(url='https://img.randme.me/', status_code=302)
 
 
 uvicorn.run(app, port=8001)

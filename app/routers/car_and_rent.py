@@ -5,7 +5,7 @@ from datetime import datetime
 from app.db import get_session
 from app.models import Car, User, Rent, Payment
 from app.schemas import GetCar, CarGeoDataUpdate, AddCar, PaymentCreate
-from app.utils import verify_access_token, get_delta_time
+from app.utils import verify_access_token, get_delta_time, get_car
 
 router = APIRouter(tags=['car_and_rent'],
                    responses={404: {"description": "Not found"}})
@@ -13,8 +13,8 @@ router = APIRouter(tags=['car_and_rent'],
 
 # @router.get('/get_car/')
 # def get_car_temp(data: GetCar, session: Session = Depends(get_session)):
-#     get_car()
-#     return cars
+#     get_car(data)
+#     return get_car(data)
 
 
 @router.post('/rent_car/')

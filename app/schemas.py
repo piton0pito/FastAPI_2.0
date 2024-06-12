@@ -49,8 +49,8 @@ class AddCar(BaseModel):
 class GetCar(BaseModel):
     brand: str = Field(default='None') # марка авто
     model: str = Field(default='None') # модель авто
-    latitude: float  # широта
-    longitude: float  # долгота
+    latitude: str = Field(default='0.0000000')  # широта
+    longitude: str = Field(default='0.0000000')  # долгота
 
 
 class CarGeoDataUpdate(BaseModel):

@@ -112,6 +112,33 @@ def get_xlsx(users, file_name):
     # Save the workbook
     workbook.save(file_name)
 
+
+def get_car(data: GetCar, session: Session = Depends(get_session)):
+    print(session.exec(select(Car)).all())
+    latitude = float(data.latitude)
+    longitude = float(data.latitude)
+    pog = 0.0002000
+    cars = {}
+    while not cars:
+        if data.brand != 'None' and data.model != 'None':
+            cars = session.exec(select(Car).where(Car.brand == data.brand).where(Car.model == data.model).where(
+                Car.latitude >= data.latitude - pog).where(Car.latitude <= data.latitude + pog).where(
+                Car.longitude >= data.longitude - pog).where(Car.longitude <= data.longitude + pog)).one()
+        elif data.brand != 'None':
+            cars = session.exec(
+                select(Car).where(Car.brand == data.brand).where(Car.latitude >= data.latitude - pog).where(
+                    Car.latitude <= data.latitude + pog).where(Car.longitude >= data.longitude - pog).where(
+                    Car.longitude <= data.longitude + pog)).one()
+        else:
+            cars = session.exec(
+                select(Car).where(Car.latitude >= data.latitude - pog).where(Car.latitude <= data.latitude + pog).where(
+                    Car.longitude >= data.longitude - pog).where(Car.longitude <= data.longitude + pog)).one()
+        pog += 0.0002000
+        print(pog)
+    return cars
+
+
+
 #
 # def get_car(data: GetCar, session: Session = Depends(get_session)):
 #     pog = 0.0000000
@@ -134,7 +161,7 @@ def get_xlsx(users, file_name):
 #         print(pog)
 #     return cars
 
-
-deta = GetCar(brand='ваз', latitude=0.1111111, longitude=0.1111111)
+# data = GetCar(latitude='0.0011001', longitude='0.0011001')
+# get_car(data)
 
 # print(get_car(deta))

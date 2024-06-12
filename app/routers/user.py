@@ -10,7 +10,6 @@ from app.utils import create_access_token, verify_access_token, hash_password, g
 router = APIRouter(tags=['user'],
                    responses={404: {"description": "Not found"}})
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 @router.post('/login/')
