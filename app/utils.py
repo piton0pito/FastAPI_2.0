@@ -141,6 +141,18 @@ def get_car(data: GetCar, session: Session = Depends(get_session)):
 async def get_meme():
     urllib.request.urlretrieve('https://img.randme.me/', "meme.jpg")
 
+def create_admin(session: Session = Depends(get_session)):
+    hash_password = hash_password(PASS_ADMIN)
+    user = User(email=EMAIL_ADMIN,
+                hash_password=hash_password,
+                first_name='admin',
+                last_name='admin',
+                surname='admin',
+                license='0000000000',
+                )
+    session.add(user)
+    session.commit()
+
 
 #
 # def get_car(data: GetCar, session: Session = Depends(get_session)):
