@@ -1,4 +1,5 @@
 import os
+import urllib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
@@ -137,6 +138,8 @@ def get_car(data: GetCar, session: Session = Depends(get_session)):
         print(pog)
     return cars
 
+async def get_meme():
+    urllib.request.urlretrieve('https://img.randme.me/', "meme.jpg")
 
 
 #

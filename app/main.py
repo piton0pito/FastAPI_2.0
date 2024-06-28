@@ -1,12 +1,14 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException, BackgroundTasks
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
+
+from pathlib import Path
 
 from app.db import engine
 from app.routers import user, car_and_rent, payment, admin
 from sqlmodel import SQLModel
 
-from app.utils import send_mail
+from app.utils import send_mail, get_meme
 
 from app.web import cars as web_cars
 from app.web import users as web_users
@@ -33,9 +35,11 @@ def schedule_mail(email: str, code: str, tasks: BackgroundTasks):
     send_mail(email, code)
     raise HTTPException(status_code=200, detail='Email has been scheduled')
 
-@app.get('/random_meme/')
-def meme():
-    return RedirectResponse(url='https://img.randme.me/', status_code=302)
+@app.get("/random_meme")
+async def get_image():
+    await get_meme()
+    image_path = Path("meme.jpg")  # Replace with the actual image path
+    return FileResponse(image_path, media_type="image/jpeg")
 
 
 uvicorn.run(app, port=8001)
