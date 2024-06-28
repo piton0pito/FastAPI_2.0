@@ -8,14 +8,14 @@ from app.db import engine
 from app.routers import user, car_and_rent, payment, admin
 from sqlmodel import SQLModel
 
-from app.utils import send_mail, get_meme, create_admin
+from app.routers.admin import create_admin
+from app.utils import send_mail, get_meme
 
 from app.web import cars as web_cars
 from app.web import users as web_users
 from app.web import login as web_login
 
 SQLModel.metadata.create_all(engine)
-create_admin()
 
 app = FastAPI()
 app.include_router(user.router)

@@ -1,4 +1,3 @@
-import os
 import urllib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -7,7 +6,6 @@ import smtplib
 import openpyxl
 
 from app.config import HOST, USERNAME, PASSWORD, PORT
-from openpyxl import Workbook
 
 from random import randint
 from fastapi import Depends
@@ -23,7 +21,7 @@ from sqlmodel import select, Session
 
 from app.db import get_session
 from app.models import User, Car
-from app.schemas import GetUser, GetCar
+from app.schemas import GetCar
 
 # SECRET_KEY = "vorona_govorit_CAR"
 # ALGORITHM = "HS256"
@@ -141,17 +139,6 @@ def get_car(data: GetCar, session: Session = Depends(get_session)):
 async def get_meme():
     urllib.request.urlretrieve('https://img.randme.me/', "meme.jpg")
 
-def create_admin(session: Session = Depends(get_session)):
-    hash_password = hash_password(PASS_ADMIN)
-    user = User(email=EMAIL_ADMIN,
-                hash_password=hash_password,
-                first_name='admin',
-                last_name='admin',
-                surname='admin',
-                license='0000000000',
-                )
-    session.add(user)
-    session.commit()
 
 
 #

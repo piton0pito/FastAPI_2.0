@@ -2,13 +2,32 @@ from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import FileResponse
 from sqlmodel import Session, select
 
+from app.config import PASS_ADMIN, EMAIL_ADMIN
 from app.models import User, Car
 from app.db import get_session
 from app.schemas import AddCar
-from app.utils import verify_access_token, get_xlsx
+from app.utils import verify_access_token, get_xlsx, hash_password
 
 router = APIRouter(prefix='/admin', tags=['admin'],
                    responses={404: {"description": "Not found"}})
+
+
+@router.post('/create_first_admin/')
+def create_admin(session: Session = Depends(get_session)):
+    if session.exec(select(User).where(User.role == 'super_user')).first():
+        raise HTTPException(status_code=400)
+    hash_pass = hash_password(PASS_ADMIN)
+    user = User(email=EMAIL_ADMIN,
+                hash_password=hash_pass,
+                first_name='admin',
+                last_name='admin',
+                surname='admin',
+                license='0000000000',
+                )
+    user.super_user()
+    session.add(user)
+    session.commit()
+
 
 @router.get('/get_all_user/')
 def get_all_user(user: User = Depends(verify_access_token), session: Session = Depends(get_session)):
@@ -55,7 +74,8 @@ def get_no_verify_user_xlsx(su_user: User = Depends(verify_access_token), sessio
 
 
 @router.get('/verify_user/{user_id}')
-def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token), session: Session = Depends(get_session)):
+def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token),
+                       session: Session = Depends(get_session)):
     if su_user.role != 'super_user':
         raise HTTPException(status_code=403)
     user = session.exec(select(User).where(User.id == user_id)).first()
@@ -71,7 +91,8 @@ def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token
 
 
 @router.put('/BAN_user/{user_id}')
-def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token), session: Session = Depends(get_session)):
+def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token),
+                       session: Session = Depends(get_session)):
     if su_user.role != 'super_user':
         raise HTTPException(status_code=403)
     user = session.exec(select(User).where(User.id == user_id)).first()
@@ -87,7 +108,8 @@ def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token
 
 
 @router.put('/un_BAN_user/{user_id}')
-def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token), session: Session = Depends(get_session)):
+def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token),
+                       session: Session = Depends(get_session)):
     if su_user.role != 'super_user':
         raise HTTPException(status_code=403)
     user = session.exec(select(User).where(User.id == user_id)).first()
@@ -115,7 +137,8 @@ def del_user(user_id: int, su_user: User = Depends(verify_access_token), session
 
 
 @router.put('/make_super_user/{user_id}')
-def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token), session: Session = Depends(get_session)):
+def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token),
+                       session: Session = Depends(get_session)):
     if su_user.role != 'super_user':
         raise HTTPException(status_code=403)
     user = session.exec(select(User).where(User.id == user_id)).first()
@@ -133,7 +156,8 @@ def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token
 
 
 @router.put('/un_make_super_user/{user_id}')
-def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token), session: Session = Depends(get_session)):
+def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token),
+                       session: Session = Depends(get_session)):
     if su_user.role != 'super_user':
         raise HTTPException(status_code=403)
     user = session.exec(select(User).where(User.id == user_id)).first()
@@ -146,7 +170,6 @@ def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token
     session.commit()
     session.refresh(user)
     raise HTTPException(status_code=200)
-
 
 
 @router.post('/add_car/')
