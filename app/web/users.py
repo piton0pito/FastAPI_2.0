@@ -4,6 +4,9 @@ from app.models import User
 from app.utils import hash_password
 from app.db import get_session
 from sqlmodel import Session, select
+from jwt import decode
+from app.config import SECRET_KEY, ALGORITHM
+
 
 router = APIRouter(include_in_schema=False)
 templates = Jinja2Templates(directory="templates")
@@ -59,3 +62,27 @@ async def reg(request: Request, db: Session = Depends(get_session)):
     return responses.RedirectResponse(
         "/?msg=Вы зарегистрированы!", status_code=status.HTTP_302_FOUND
     )
+
+
+@router.get("/account")
+def account(request: Request, db: Session=Depends(get_session)):
+    errors = []
+    token = request.cookies.get("access_token")
+    if not token:
+        errors.append("Войдите в аккаунт")
+        return templates.TemplateResponse("homepage.html", {"request": request, "errors": errors})
+    else:
+        scheme, _, param = token.partition(" ")
+        payload = decode(param, SECRET_KEY, algorithms=[ALGORITHM])
+        id = payload.get("sub")
+        user = db.query(User).filter(User.id == id).first()
+        if user is None:
+            errors.append("Сначала создайте учетную запись или войдите в систему")
+            return templates.TemplateResponse("homepage.html", {"request": request, "errors": errors})
+        return templates.TemplateResponse("account.html", {"request": request, "user": user})
+
+
+@router.get("/all_users")
+def all_users(request: Request, db: Session=Depends(get_session)):
+    users = db.query(User).all()
+    return templates.TemplateResponse("all_users.html", {"request": request, "users": users})
