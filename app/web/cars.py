@@ -29,7 +29,7 @@ def payments(request: Request):
 
 
 @router.post("/payments")
-async def payments(request: "Request", db:Session=Depends(get_session)):
+async def payments(request: Request, db:Session=Depends(get_session)):
     form = await request.form()
     card_number = form.get("card_number")
     valid_thru_m = form.get("valid_thru_m")
@@ -75,7 +75,7 @@ def start_rent(request: Request):
 
 
 @router.post("/start_rent")
-async def start_rent(request: "Request", db:Session=Depends(get_session)):
+async def start_rent(request: Request, db:Session=Depends(get_session)):
     form = await request.form()
     car_number = form.get("car_number")
     errors = []
@@ -122,7 +122,7 @@ def end_rent(request: Request):
 
 
 @router.post("/end_rent")
-async def end_rent(request: "Request", db:Session=Depends(get_session)):
+async def end_rent(request: Request, db:Session=Depends(get_session)):
     form = await request.form()
     car_number = form.get("car_number")
     card_number = form.get("card_number")
