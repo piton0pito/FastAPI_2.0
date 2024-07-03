@@ -160,3 +160,54 @@ async def end_rent(request: "Request", db:Session=Depends(get_session)):
         db.refresh(rent)
         db.refresh(car)
         return responses.RedirectResponse("/payments", status_code=status.HTTP_302_FOUND)
+
+
+@router.get("/add_car")
+def create_car(request: Request):
+    return templates.TemplateResponse("add_car.html", {"request": request})
+
+
+@router.post("/add_car")
+async def create_car(request: Request, db: Session = Depends(get_session)):
+    form = await request.form()
+    brand = form.get("brand")
+    model = form.get("model")
+    car_number = form.get("car_number")
+    price_order = form.get("price_order")
+    latitude = form.get("latitude")
+    longitude = form.get("longitude")
+
+    errors = []
+
+    if len(car_number) != 9:
+        errors.append("Номер должен состоять из 9 символов!")
+        return templates.TemplateResponse("add_car.html", {"request": request, "errors": errors})
+    if latitude is None:
+        errors.append("Введите широту")
+        return templates.TemplateResponse("add_car.html", {"request": request, "errors": errors})
+
+    car = Car(brand=brand,
+              model=model,
+              car_number=car_number,
+              price_order=price_order,
+              latitude=latitude,
+              longitude=longitude,
+              )
+
+
+    db.add(car)
+    db.commit()
+    db.refresh(car)
+    msg = "Машина добавлена!"
+    return templates.TemplateResponse("add_car.html", {"request": request, "msg": msg})
+
+
+@router.get("/del_car")
+def del_car(request: Request, db:Session=Depends(get_session)):
+    errors = []
+    token = request.cookies.get("access_token")
+    if token is None:
+        errors.append("Вы не авторизовались/зарегистрировались")
+        return templates.TemplateResponse("del_car.html", {"request": request, "errors": errors})
+    cars = db.query(Car).all()
+    return templates.TemplateResponse("del_car.html", {"request": request, "cars": cars})
