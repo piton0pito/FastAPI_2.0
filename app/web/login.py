@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Request, Depends
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select
+from starlette.responses import RedirectResponse
+
 from app.db import get_session
 from app.models import User
 from app.utils import create_access_token
@@ -34,6 +36,7 @@ async def login(request: Request, db: Session = Depends(get_session)):
         access_token = create_access_token(data={"sub": user.id})
         response = RedirectResponse(url="/", status_code=302)
         response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
+        response.set_cookie(key="role", value=user.role, httponly=True)
         return response
 
 
@@ -41,4 +44,5 @@ async def login(request: Request, db: Session = Depends(get_session)):
 async def logout(request: Request):
     response = RedirectResponse(url="/", status_code=302)
     response.delete_cookie(key="access_token")
+    response.delete_cookie(key="role")
     return response
