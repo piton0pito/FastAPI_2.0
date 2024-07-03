@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}
+	<title>Добавление машин</title>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="text-center">Добавление машин</h1>
+            {% if msg %}
+                <div class="alert alert-success" role="alert">
+                    {{msg}}
+                </div>
+            {% endif %}
+            {% for error in errors %}
+                    <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                    </div>
+            {% endfor %}
+        <form method="POST">
+            <div class="mb-3">
+              <label for="brand" class="form-label">Бренд:</label>
+              <input type="text" required class="form-control" name="brand" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="model" class="form-label">Модель:</label>
+                <input type="text" required class="form-control" name="model" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="car_number" class="form-label">Номер:</label>
+                <input type="text" required class="form-control" name="car_number" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="price_order" class="form-label">Цена:</label>
+                <input type="number" required class="form-control" name="price_order" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="latitude" class="form-label">Широта:</label>
+                <input type="text" required class="form-control" name="latitude" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="longitude" class="form-label">Долгота:</label>
+                <input type="text" required class="form-control" name="longitude" aria-describedby="emailHelp">
+            </div>
+            <button type="submit" class="btn btn-primary">Добавить</button>
+        </form>
+    </div>
+{% endblock %}
