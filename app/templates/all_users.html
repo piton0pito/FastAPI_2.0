@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Все пользователи</title>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% for error in errors %}
+            <div class="alert alert-danger" role="alert">
+                {{error}}
+            </div>
+        {% endfor %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Роль</th>
+                    <th scope="col">Почта</th>
+                    <th scope="col">Имя</th>
+                    <th scope="col">Отчество</th>
+                    <th scope="col">Фамилия</th>
+                    <th scope="col">Лицензия</th>
+                    <th scope="col">Дата регистрации</th>
+                    <th>
+                        <form method="POST" action="/get_all_users/xlsx">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-download">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+                                    </svg>
+                                </i>
+                                Скачать
+                            </button>
+                        </form>
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                {% for user in users %}
+                    <tr>
+                        <th scope="row">{{loop.index}}</th>
+                        <td>{{user.role}}</td>
+                        <td>{{user.email}}</td>
+                        <td>{{user.first_name}}</td>
+                        <td>{{user.last_name}}</td>
+                        <td>{{user.surname}}</td>
+                        <td>{{user.license}}</td>
+                        <td>{{user.date_reg}}</td>
+                        <td>
+                            <form method="POST" action="/all_users/{{user.id}}">  
+                                <button type="submit" class="btn btn-danger">
+                                    <i>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                                            <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                                        </svg>
+                                    </i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

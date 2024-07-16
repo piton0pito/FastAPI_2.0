@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}
+    <title>Аренда</title>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h3 class="text-center">Аренда</h3>
+        {% for error in errors %}
+                    <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                    </div>
+        {% endfor %}
+        <div class="row">
+            {% for car in cars %}
+                <div class="col">
+                    <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
+                            <p class="card-text">Цена: {{ car.price_order }}</p>
+                            <div class="btn-group">
+                                {% if car.status == "active" %}
+                                <form method="POST" action="/start_rent/{{car.id}}">
+                                    <button type="submit" class="btn btn-success">Начать</button>
+                                </form>
+                                {% elif car.status == "no active" %}
+                                    {% if rent and rent.car_id == car.id and rent.user_id == user.id %}
+                                        <form method="POST" action="/end_rent/{{car.id}}">
+                                            <button type="submit" class="btn btn-danger">Закончить</button>
+                                        </form>
+                                    {% endif %}
+                                {% else %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

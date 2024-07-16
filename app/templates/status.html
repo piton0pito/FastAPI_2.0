@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Статус</title>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% for error in errors %}
+            <div class="alert alert-danger" role="alert">
+                {{error}}
+            </div>
+        {% endfor %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Бренд</th>
+                    <th scope="col">Модель</th>
+                    <th scope="col">Номер</th>
+                    <th scope="col">Цена</th>
+                    <th scope="col">Широта</th>
+                    <th scope="col">Долгота</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                {% for car in cars %}
+                    <tr>
+                        <th scope="row">{{loop.index}}</th>
+                        <td>{{car.brand}}</td>
+                        <td>{{car.model}}</td>
+                        <td>{{car.car_number}}</td>
+                        <td>{{car.price_order}}</td>
+                        <td>{{car.latitude}}</td>
+                        <td>{{car.longitude}}</td>
+                        <td>{{car.status}}</td>
+                        <td>
+                            {% if car.status == "active" %}
+                            <div class="btn-group">
+                                <form method="POST" action="/service_car/{{car.id}}">  
+                                    <button type="submit" class="btn btn-warning" style="margin-right: 10px;">Сервис</button>
+                                </form>
+                                <form method="POST" action="/no_active_car/{{car.id}}">  
+                                    <button type="submit" class="btn btn-danger">Не актив</button>
+                                </form>
+                            </div>
+                            {% elif car.status == "no active" %}
+                            <div class="btn-group">
+                                <form method="POST" action="/service_car/{{car.id}}">  
+                                    <button type="submit" class="btn btn-warning" style="margin-right: 10px;">Сервис</button>
+                                </form>
+                                <form method="POST" action="/active_car/{{car.id}}">  
+                                    <button type="submit" class="btn btn-success">Актив</button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <div class="btn-group">
+                                <form method="POST" action="/active_car/{{car.id}}">  
+                                    <button type="submit" class="btn btn-success" style="margin-right: 20px;">Актив</button>
+                                </form>
+                                <form method="POST" action="/no_active_car/{{car.id}}">  
+                                    <button type="submit" class="btn btn-danger">Не актив</button>
+                                </form>
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}
+	<title>Смена пароля</title>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="text-center">Смена пароля</h1>
+            {% if msg %}
+                <div class="alert alert-success" role="alert">
+                    {{msg}}
+                </div>
+            {% endif %}
+            {% for error in errors %}
+                    <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                    </div>
+            {% endfor %}
+        <form method="POST">
+            <div class="mb-3">
+              <label for="email" class="form-label">Почта:</label>
+              <input type="email" required class="form-control" name="email" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Пароль:</label>
+              <input type="password" required class="form-control" name="password" aria-describedby="emailHelp">
+            </div>
+            <div class="mb-3">
+                <label for="complete_password" class="form-label">Подтверждение пароля:</label>
+                <input type="password" required class="form-control" name="complete_password" aria-describedby="emailHelp">
+            </div>
+            <button type="submit" class="btn btn-primary">Сменить пароль</button>
+        </form>
+    </div>
+{% endblock %}
