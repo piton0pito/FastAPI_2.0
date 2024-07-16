@@ -67,73 +67,65 @@ async def payments(request: Request, db:Session=Depends(get_session)):
             return templates.TemplateResponse("payments.html", {"request": request, "msg": msg})
 
 
-
-
-@router.get("/start_rent")
-def start_rent(request: Request):
-    return templates.TemplateResponse("start_rent.html", {"request": request})
-
-
-@router.post("/start_rent")
-async def start_rent(request: Request, db:Session=Depends(get_session)):
-    form = await request.form()
-    car_number = form.get("car_number")
+@router.get("/rent")
+def rent(request: Request, db: Session=Depends(get_session)):
     errors = []
-    if not car_number:
-        errors.append("Введите номер машины")
-        return templates.TemplateResponse("start_rent.html", {"request": request, "errors": errors})
     token = request.cookies.get("access_token")
-    if not token:
-        errors.append("Не авторизовались")
-        return templates.TemplateResponse("start_rent.html", {"request": request, "errors": errors})
-    else:
+    if token:
         scheme, _, param = token.partition(" ")
         payload = decode(param, SECRET_KEY, algorithms=[ALGORITHM])
         id = payload.get("sub")
         user = db.query(User).filter(User.id == id).first()
+        rent = db.exec(select(Rent).where(Rent.user_id == user.id).where(Rent.data_rent_end == None)).first()
+        cars = db.query(Car).all()
+        return templates.TemplateResponse("rent.html", {"request": request, "cars": cars, "rent": rent, "user": user})
+    else:
+        errors.append("Не вошли в аккаунт/Не являетесь администратором")
+        return templates.TemplateResponse("homepage.html", {"request": request, "errors": errors})
+
+
+@router.post("/start_rent/{id}")
+def start_rent(request: Request, id: int, db:Session=Depends(get_session)):
+    token = request.cookies.get("access_token")
+    errors = []
+    if not token:
+        errors.append("Не авторизовались")
+        return templates.TemplateResponse("rent.html", {"request": request, "errors": errors})
+    else:
+        scheme, _, param = token.partition(" ")
+        payload = decode(param, SECRET_KEY, algorithms=[ALGORITHM])
+        id_token = payload.get("sub")
+        user = db.query(User).filter(User.id == id_token).first()
         if user is None:
             errors.append("Cначала создайте учетную запись или войдите в систему")
-            return templates.TemplateResponse("start_rent.html", {"request": request, "errors": errors})
+            return templates.TemplateResponse("rent.html", {"request": request, "errors": errors})
         if user.role == 'no_verify':
             errors.append("Вы не прошли проверку")
-            return templates.TemplateResponse("start_rent.html", {"request": request, "errors": errors})
-        car = db.exec(select(Car).where(Car.car_number == car_number)).first()
+            return templates.TemplateResponse("rent.html", {"request": request, "errors": errors})
+        car = db.exec(select(Car).where(Car.id == id)).first()
         if db.exec(select(Payment).where(Payment.user_id == user.id).where(Payment.status == 'waiting')).first():
             errors.append("У вас неоплаченная поездка")
-            return templates.TemplateResponse("start_rent.html", {"request": request, "errors": errors})
-        if not car:
-            errors.append("Неправильный номер машины")
-            return templates.TemplateResponse("start_rent.html", {"request": request, "errors": errors})
+            return templates.TemplateResponse("rent.html", {"request": request, "errors": errors})
         if db.exec(select(Rent).where(Rent.user_id == user.id).where(Rent.data_rent_end == None)).first():
             errors.append("Вы не завершили последнюю поездку. Чтобы продолжить, завершите.")
-            return templates.TemplateResponse("start_rent.html", {"request": request, "errors": errors})
+            return templates.TemplateResponse("rent.html", {"request": request, "errors": errors})
         car.no_active()
         rent = Rent(user_id=user.id, car_id=car.id)
         db.add(car)
         db.add(rent)
         db.commit()
         db.refresh(car)
-        return responses.RedirectResponse("/end_rent", status_code=status.HTTP_302_FOUND)
+        cars = db.query(Car).all()
+        return templates.TemplateResponse("rent.html", {"request": request, "cars": cars, "rent": rent, "user": user})
 
 
-@router.get("/end_rent")
-def end_rent(request: Request):
-    return templates.TemplateResponse("end_rent.html", {"request": request})
-
-
-@router.post("/end_rent")
-async def end_rent(request: Request, db:Session=Depends(get_session)):
-    form = await request.form()
-    car_number = form.get("car_number")
-    card_number = form.get("card_number")
-    errors = []
-    if not car_number:
-        errors.append("Введите номер машины")
-        return templates.TemplateResponse("end_rent.html", {"request": request, "errors": errors})
+@router.post("/end_rent/{id}")
+def end_rent(request: Request, db:Session=Depends(get_session)):
     token = request.cookies.get("access_token")
+    errors = []
     if token is None:
         errors.append("Не авторизовались")
-        return templates.TemplateResponse("end_rent.html", {"request": request, "errors": errors})
+        return templates.TemplateResponse("rent.html", {"request": request, "errors": errors})
     else:
         scheme, _, param = token.partition(" ")
         payload = decode(param, SECRET_KEY, algorithms=[ALGORITHM])
@@ -141,30 +133,40 @@ async def end_rent(request: Request, db:Session=Depends(get_session)):
         user = db.query(User).filter(User.id == id).first()
         if user is None:
             errors.append("Cначала создайте учетную запись или войдите в систему")
-            return templates.TemplateResponse("end_rent.html", {"request": request, "errors": errors})
+            return templates.TemplateResponse("rent.html", {"request": request, "errors": errors})
+        if user.role == 'no_verify':
+            errors.append("Вы не прошли проверку")
+            return templates.TemplateResponse("rent.html", {"request": request, "errors": errors})
         rent = db.exec(select(Rent).where(Rent.user_id == user.id).where(Rent.data_rent_end == None)).first()
         if not rent:
             errors.append("У вас нет начатых поездок")
-            return templates.TemplateResponse("end_rent.html", {"request": request, "errors": errors})
+            return templates.TemplateResponse("rent.html", {"request": request, "errors": errors})
         car = db.exec(select(Car).where(Car.id == rent.car_id)).first()
         rent_id = rent.id
         rent.end()
         car.active()
-        print(rent.id)
         payment = Payment(rent_id=rent_id, user_id=user.id, prise=(car.price_order * get_delta_time(rent.data_rent_start, rent.data_rent_end)),
-                      card_number=card_number, data=rent.data_rent_end, status="waiting")
+                        card_number=car.car_number, data=rent.data_rent_end, status="waiting")
         db.add(rent)
         db.add(car)
         db.add(payment)
         db.commit()
         db.refresh(rent)
         db.refresh(car)
-        return responses.RedirectResponse("/payments", status_code=status.HTTP_302_FOUND)
+        cars = db.query(Car).all()
+        return templates.TemplateResponse("rent.html", {"request": request, "cars": cars, "rent": rent, "user": user})
 
 
 @router.get("/add_car")
 def create_car(request: Request):
-    return templates.TemplateResponse("add_car.html", {"request": request})
+    errors = []
+    token = request.cookies.get("access_token")
+    role = request.cookies.get("role")
+    if token and (role == "super_user"):
+        return templates.TemplateResponse("add_car.html", {"request": request})
+    else:
+        errors.append("Не вошли в аккаунт/Не являетесь администратором")
+        return templates.TemplateResponse("homepage.html", {"request": request, "errors": errors})
 
 
 @router.post("/add_car")
@@ -176,16 +178,21 @@ async def create_car(request: Request, db: Session = Depends(get_session)):
     price_order = form.get("price_order")
     latitude = form.get("latitude")
     longitude = form.get("longitude")
-
     errors = []
-
+    token = request.cookies.get("access_token")
+    role = request.cookies.get("role")
+    if not token:
+        errors.append("Войдите в аккаунт")
+        return templates.TemplateResponse("add_car.html", {"request": request, "errors": errors})
+    if role != "super_user":
+        errors.append("Вы не являетесь администратором")
+        return templates.TemplateResponse("add_car.html", {"request": request, "errors": errors})
     if len(car_number) != 9:
         errors.append("Номер должен состоять из 9 символов!")
         return templates.TemplateResponse("add_car.html", {"request": request, "errors": errors})
     if latitude is None:
         errors.append("Введите широту")
         return templates.TemplateResponse("add_car.html", {"request": request, "errors": errors})
-
     car = Car(brand=brand,
               model=model,
               car_number=car_number,
@@ -193,8 +200,6 @@ async def create_car(request: Request, db: Session = Depends(get_session)):
               latitude=latitude,
               longitude=longitude,
               )
-
-
     db.add(car)
     db.commit()
     db.refresh(car)
@@ -206,8 +211,113 @@ async def create_car(request: Request, db: Session = Depends(get_session)):
 def del_car(request: Request, db:Session=Depends(get_session)):
     errors = []
     token = request.cookies.get("access_token")
-    if token is None:
-        errors.append("Вы не авторизовались/зарегистрировались")
+    role = request.cookies.get("role")
+    if token and (role == "super_user"):
+        cars = db.query(Car).all()
+        return templates.TemplateResponse("del_car.html", {"request": request, "cars": cars})
+    else:
+        errors.append("Не вошли в аккаунт/Не являетесь администратором")
+        return templates.TemplateResponse("homepage.html", {"request": request, "errors": errors})
+
+
+@router.post("/del_car/{id}")
+def del_car(request: Request, id: int, db:Session=Depends(get_session)):
+    errors = []
+    token = request.cookies.get("access_token")
+    role = request.cookies.get("role")
+    if not token:
+        errors.append("Войдите в аккаунт")
         return templates.TemplateResponse("del_car.html", {"request": request, "errors": errors})
+    if role != "super_user":
+        errors.append("Вы не являетесь администратором")
+        return templates.TemplateResponse("del_car.html", {"request": request, "errors": errors})
+    car = db.exec(select(Car).where(Car.id == id)).first()
+    if not car:
+        errors.append("Машина не найдена")
+        return templates.TemplateResponse("del_car.html", {"request": request, "errors": errors})
+    db.delete(car)
+    db.commit()
     cars = db.query(Car).all()
     return templates.TemplateResponse("del_car.html", {"request": request, "cars": cars})
+
+
+@router.get("/status")
+def status_car(request: Request, db: Session=Depends(get_session)):
+    errors = []
+    token = request.cookies.get("access_token")
+    role = request.cookies.get("role")
+    if token and (role == "super_user"):
+        cars = db.query(Car).all()
+        return templates.TemplateResponse("status.html", {"request": request, "cars": cars})
+    else:
+        errors.append("Не вошли в аккаунт/Не являетесь администратором")
+        return templates.TemplateResponse("homepage.html", {"request": request, "errors": errors})
+
+
+@router.post("/service_car/{id}")
+def service_car(request: Request, id: int, db: Session = Depends(get_session)):
+    errors = []
+    token = request.cookies.get("access_token")
+    role = request.cookies.get("role")
+    if not token:
+        errors.append("Войдите в аккаунт")
+        return templates.TemplateResponse("status.html", {"request": request, "errors": errors})
+    if role != "super_user":
+        errors.append("Вы не являетесь администратором")
+        return templates.TemplateResponse("status.html", {"request": request, "errors": errors})
+    car = db.exec(select(Car).where(Car.id == id)).first()
+    if not car:
+        errors.append("Машина не найдена")
+        return templates.TemplateResponse("status.html", {"request": request, "errors": errors})
+    car.service()
+    db.add(car)
+    db.commit()
+    db.refresh(car)
+    cars = db.query(Car).all()
+    return templates.TemplateResponse("status.html", {"request": request, "cars": cars})
+
+
+@router.post("/active_car/{id}")
+def active_car(request: Request, id: int, db: Session = Depends(get_session)):
+    errors = []
+    token = request.cookies.get("access_token")
+    role = request.cookies.get("role")
+    if not token:
+        errors.append("Войдите в аккаунт")
+        return templates.TemplateResponse("status.html", {"request": request, "errors": errors})
+    if role != "super_user":
+        errors.append("Вы не являетесь администратором")
+        return templates.TemplateResponse("status.html", {"request": request, "errors": errors})
+    car = db.exec(select(Car).where(Car.id == id)).first()
+    if not car:
+        errors.append("Машина не найдена")
+        return templates.TemplateResponse("status.html", {"request": request, "errors": errors})
+    car.active()
+    db.add(car)
+    db.commit()
+    db.refresh(car)
+    cars = db.query(Car).all()
+    return templates.TemplateResponse("status.html", {"request": request, "cars": cars})
+
+
+@router.post("/no_active_car/{id}")
+def no_active_car(request: Request, id: int, db: Session = Depends(get_session)):
+    errors = []
+    token = request.cookies.get("access_token")
+    role = request.cookies.get("role")
+    if not token:
+        errors.append("Войдите в аккаунт")
+        return templates.TemplateResponse("status.html", {"request": request, "errors": errors})
+    if role != "super_user":
+        errors.append("Вы не являетесь администратором")
+        return templates.TemplateResponse("status.html", {"request": request, "errors": errors})
+    car = db.exec(select(Car).where(Car.id == id)).first()
+    if not car:
+        errors.append("Машина не найдена")
+        return templates.TemplateResponse("status.html", {"request": request, "errors": errors})
+    car.no_active()
+    db.add(car)
+    db.commit()
+    db.refresh(car)
+    cars = db.query(Car).all()
+    return templates.TemplateResponse("status.html", {"request": request, "cars": cars})
