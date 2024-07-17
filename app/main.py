@@ -17,8 +17,8 @@ from app.utils import send_mail, get_meme
 from app.web import cars as web_cars
 from app.web import users as web_users
 from app.web import login as web_login
-
-SQLModel.metadata.create_all(engine)
+if __name__ == '__main__':
+    SQLModel.metadata.create_all(engine)
 
 app = FastAPI()
 app.include_router(user.router)

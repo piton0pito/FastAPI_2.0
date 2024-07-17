@@ -11,7 +11,7 @@ router = APIRouter(tags=['car_and_rent'],
                    responses={404: {"description": "Not found"}})
 
 
-@router.post('/get_cars/')
+@router.post('/get_cars/')      #это post запрос, так как для get запроса слишком большой обьем отправляемой инормации
 def get_car_temp(data: GetCar, session: Session = Depends(get_session)):
     if not data.brand and not data.model:
         cars = session.exec(select((Car))).all()
