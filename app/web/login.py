@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Request, Depends
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select
+from starlette.responses import RedirectResponse
+
 from app.db import get_session
 from app.models import User
 from app.utils import create_access_token
@@ -34,6 +36,7 @@ async def login(request: Request, db: Session = Depends(get_session)):
         access_token = create_access_token(data={"sub": user.id})
         response = RedirectResponse(url="/", status_code=302)
         response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
+        response.set_cookie(key="role", value=user.role, httponly=True)
         return response
 
 
@@ -41,4 +44,58 @@ async def login(request: Request, db: Session = Depends(get_session)):
 async def logout(request: Request):
     response = RedirectResponse(url="/", status_code=302)
     response.delete_cookie(key="access_token")
+    response.delete_cookie(key="role")
     return response
+
+@router.get("/reset_password")
+def reset_password(request: Request):
+    return templates.TemplateResponse("reset_password.html", {"request": request})
+
+
+@router.post("/reset_password")
+async def reset_password(request: Request, db: Session = Depends(get_session)):
+    form = await request.form()
+    email = form.get("email")
+    errors = []
+    user = db.exec(select(User).where(User.email == email)).first()
+    if not user:
+        errors.append("Неправильная почта")
+        return templates.TemplateResponse("reset_password.html", {"request": request})
+    code = gen_res_key()
+    user.sqlmodel_update({"temp_data": code})
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    msg = user.temp_data
+    return templates.TemplateResponse("reset_password.html", {"request": request, "msg": msg})
+
+
+@router.get("/create_new_password")
+def create_new_password(request: Request):
+    return templates.TemplateResponse("create_new_password.html", {"request": request})
+
+
+@router.post("/create_new_password")
+async def create_new_password(request: Request, db: Session = Depends(get_session)):
+    errors = []
+    form = await request.form()
+    email = form.get("email")
+    code = form.get("code")
+    password = form.get("password")
+    complete_password = form.get("complete_password")
+    user = db.exec(select(User).where(User.email == email)).first()
+    if not user:
+        errors.append("Некорректные пользователь или код")
+        return templates.TemplateResponse("create_new_password.html", {"request": request, "errors": errors})
+    if code != user.temp_data:
+        errors.append("Некорректные пользователь или код")
+        return templates.TemplateResponse("create_new_password.html", {"request": request, "errors": errors})
+    if password != complete_password:
+        errors.append("Некорректный пароль")
+        return templates.TemplateResponse("create_new_password.html", {"request": request, "errors": errors})
+    user.sqlmodel_update({'hash_password': hash_password(password)})
+    user.sqlmodel_update(({'temp_data': None}))
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return responses.RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
