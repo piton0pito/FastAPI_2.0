@@ -29,12 +29,12 @@ def test_418():
     assert response.status_code == 418
 
 
-def test_user_create_first_admin():
+def test_create_first_admin():
     response = client.post("/admin/create_first_admin")
     assert response.status_code == 201
 
 
-def test_user_register_success():
+def test_register_success():
     data = {
         "email": "test_email@mail.ru",
         "phone": "+78005553535",
@@ -49,7 +49,7 @@ def test_user_register_success():
     assert response.status_code == 201
 
 
-def test_user_register_invalid_email():
+def test_register_invalid_email():
     data = {
         "email": "test_email@mail.ru",
         "phone": "+78005553535",
@@ -64,7 +64,7 @@ def test_user_register_invalid_email():
     assert response.status_code == 400
 
 
-def test_user_register_invalid_password():
+def test_register_invalid_password():
     data = {
         "email": "test_email_2@mail.ru",
         "phone": "+78005553535",
@@ -79,7 +79,7 @@ def test_user_register_invalid_password():
     assert response.status_code == 401
 
 
-def test_user_login_user_success():
+def test_login_user_success():
     data = {
         "grant_type": "password",
         "username": "test_email@mail.ru",
@@ -96,7 +96,7 @@ def test_user_login_user_success():
     assert access_token == response_data["access_token"]
 
 
-def test_user_login_user_invalid_credentials():
+def test_login_user_invalid_credentials():
     data = {
         "grant_type": "password",
         "username": "test_incor@mail.ru",
@@ -108,7 +108,7 @@ def test_user_login_user_invalid_credentials():
     assert response.json()["detail"] == "Incorrect email or password"
 
 
-def test_user_update_user_data_success():
+def test_update_user_data_success():
     data = {
         "grant_type": "password",
         "username": "test_email@mail.ru",
@@ -127,7 +127,7 @@ def test_user_update_user_data_success():
     assert response.status_code == 200
 
 
-def test_user_update_user_data_email_is_busy():
+def test_update_user_data_email_is_busy():
     data = {
         "grant_type": "password",
         "username": "test_email_2@mail.ru",
@@ -146,7 +146,7 @@ def test_user_update_user_data_email_is_busy():
     assert response.status_code == 400
 
 
-def test_user_update_user_data_incorrect_password():
+def test_update_user_data_incorrect_password():
     data = {
         "grant_type": "password",
         "username": "test_email_2@mail.ru",
@@ -165,7 +165,7 @@ def test_user_update_user_data_incorrect_password():
     assert response.status_code == 401
 
 
-def test_user_reset_password_success():
+def test_reset_password_success():
     data = {
         "email": "test_email_2@mail.ru",
     }
@@ -173,7 +173,7 @@ def test_user_reset_password_success():
     assert response.status_code == 201
 
 
-def test_user_reset_password_incorrect_email():
+def test_reset_password_incorrect_email():
     data = {
         "email": "test_email_inc@mail.ru",
     }
@@ -181,7 +181,7 @@ def test_user_reset_password_incorrect_email():
     assert response.status_code == 401
 
 
-def test_user_create_new_password_incorrect_password():
+def test_create_new_password_incorrect_password():
     email = 'test_email_2@mail.ru'
 
     with Session(engine) as session:
@@ -196,7 +196,7 @@ def test_user_create_new_password_incorrect_password():
     assert response.status_code == 401
 
 
-def test_user_create_new_password_success():
+def test_create_new_password_success():
     email = 'test_email_2@mail.ru'
 
     with Session(engine) as session:
@@ -211,7 +211,7 @@ def test_user_create_new_password_success():
     assert response.status_code == 200
 
 
-def test_user_create_new_password_incorrect_email_or_code():
+def test_create_new_password_incorrect_email_or_code():
     email = 'test_email_2@mail.ru'
     data = {
         "email": email,
@@ -223,7 +223,7 @@ def test_user_create_new_password_incorrect_email_or_code():
     assert response.status_code == 400
 
 
-def test_user_me_success():
+def test_me_success():
     data = {
         "grant_type": "password",
         "username": EMAIL_ADMIN,
@@ -237,19 +237,11 @@ def test_user_me_success():
     assert response.json()['email'] == EMAIL_ADMIN
 
 
-def test_user_me_not_authenticated():
+def test_me_not_authenticated():
     response = client.get('/me/')
     assert response.status_code == 401
 
 
 
-# def test_car_and_rent_
-#
-#
-# def test_payment_make_payment_success():
-
-
-
-
-def test_dop_test_table():
-    SQLModel.metadata.drop_all(engine)
+# def test_dop_test_table():
+#     SQLModel.metadata.drop_all(engine)
