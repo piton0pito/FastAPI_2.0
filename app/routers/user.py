@@ -1,10 +1,11 @@
 from fastapi import APIRouter, HTTPException, Response, Depends
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from pydantic import json
 from sqlmodel import Session, select
 
 from app.db import get_session
 from app.models import User
-from app.schemas import UserCreate, UserUpdate, CreateNewPassword, GetUser
+from app.schemas import UserCreate, UserUpdate, CreateNewPassword, GetUser, Email
 from app.utils import create_access_token, verify_access_token, hash_password, gen_res_key, send_mail
 
 router = APIRouter(tags=['user'],
@@ -49,7 +50,7 @@ def reg_user(user: UserCreate,
                    )
     session.add(db_user)
     session.commit()
-    raise HTTPException(status_code=200)
+    raise HTTPException(status_code=201)
 
 
 @router.post('/token')
@@ -74,7 +75,7 @@ def update_user_data(data: UserUpdate,
                      session: Session = Depends(get_session),
                      user: User = Depends(verify_access_token)
                      ):
-    if session.exec(select(User).where(User.email == data.email)).first():
+    if session.exec(select(User).where(User.email == data.email)).first() and user.email != data.email:
         raise HTTPException(status_code=400, detail='Email is busy')
     if data.password != data.complete_password:
         raise HTTPException(status_code=401, detail='Incorrect password')
@@ -88,13 +89,13 @@ def update_user_data(data: UserUpdate,
 
 
 @router.put('/reset_password/')
-def reset_password(email: str, session: Session = Depends(get_session)):
-    temp_user = session.exec(select(User).where(User.email == email)).first()
+def reset_password(email: Email, session: Session = Depends(get_session)):
+    temp_user = session.exec(select(User).where(User.email == email.email)).first()
     if not temp_user:
         raise HTTPException(status_code=401, detail='Incorrect email')
     code = gen_res_key()
     send_mail(temp_user.email, code)
-    print(code)
+    # print(code)
     temp_user.sqlmodel_update({'temp_data': code})
     session.add(temp_user)
     session.commit()

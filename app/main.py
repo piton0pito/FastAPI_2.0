@@ -1,12 +1,15 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.responses import RedirectResponse, FileResponse
-
+from fastapi.security import HTTPBasic
+from fastapi.testclient import TestClient
 from pathlib import Path
 
-from app.db import engine
+from sqlmodel import create_engine
+
+from app.db import engine, get_session
 from app.routers import user, car_and_rent, payment, admin
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, Session
 
 from app.routers.admin import create_admin
 from app.utils import send_mail, get_meme
@@ -43,4 +46,4 @@ async def get_image():
     return FileResponse(image_path, media_type="image/jpeg")
 
 
-uvicorn.run(app, port=8001)
+# uvicorn.run(app, port=8001)

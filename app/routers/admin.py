@@ -27,6 +27,7 @@ def create_admin(session: Session = Depends(get_session)):
     user.super_user()
     session.add(user)
     session.commit()
+    raise HTTPException(status_code=201)
 
 
 @router.get('/get_all_user/')

@@ -47,10 +47,10 @@ class AddCar(BaseModel):
 
 
 class GetCar(BaseModel):
-    brand: str = Field(default='None') # марка авто
-    model: str = Field(default='None') # модель авто
-    latitude: str = Field(default='0.0000000')  # широта
-    longitude: str = Field(default='0.0000000')  # долгота
+    brand: str = Field(default='vas') # марка авто
+    model: str = Field(default='1111') # модель авто
+    # latitude: str = Field(default='0.0000000')  # широта
+    # longitude: str = Field(default='0.0000000')  # долгота
 
 
 class CarGeoDataUpdate(BaseModel):
@@ -69,3 +69,11 @@ class PaymentCreate(BaseModel):
     valid_thru_m: datetime = Field(default=datetime.now().month)  # дата валидности банковской карты
     valid_thru_y: datetime = Field(default=datetime.now().year)  # дата валидности банковской карты
     svv: str = Field(default='000')
+
+
+class Email(BaseModel):
+    email: str
+
+
+class CarNumber(BaseModel):
+    car_number: str

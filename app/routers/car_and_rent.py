@@ -11,10 +11,18 @@ router = APIRouter(tags=['car_and_rent'],
                    responses={404: {"description": "Not found"}})
 
 
-# @router.get('/get_car/')
-# def get_car_temp(data: GetCar, session: Session = Depends(get_session)):
-#     get_car(data)
-#     return get_car(data)
+@router.post('/get_cars/')
+def get_car_temp(data: GetCar, session: Session = Depends(get_session)):
+    if not data.brand and not data.model:
+        cars = session.exec(select((Car))).all()
+    elif data.brand and not data.model:
+        cars = session.exec(select(Car).where(Car.brand == data.brand)).all()
+    elif data.brand and data.model:
+        cars = session.exec(select(Car).where(Car.brand == data.brand).where(Car.model == data.model)).all()
+    else:
+        return {'msg': 'First, choose a car brand'}
+    return cars
+
 
 
 @router.post('/rent_car/')
