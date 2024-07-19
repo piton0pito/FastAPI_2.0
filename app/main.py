@@ -45,5 +45,5 @@ async def get_image():
     image_path = Path("meme.jpg")  # Replace with the actual image path
     return FileResponse(image_path, media_type="image/jpeg")
 
-
-# uvicorn.run(app, port=8001)
+if __name__ == '__main__':
+    uvicorn.run(app, port=8001)

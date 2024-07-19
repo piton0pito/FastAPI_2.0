@@ -53,7 +53,7 @@ class Car(SQLModel, table=True):
         self.status = 'active'
 
     def no_active(self):
-        self.status = 'no active'
+        self.status = 'no_active'
 
 
 class Rent(SQLModel, table=True):

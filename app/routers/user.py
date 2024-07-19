@@ -75,7 +75,7 @@ def update_user_data(data: UserUpdate,
                      session: Session = Depends(get_session),
                      user: User = Depends(verify_access_token)
                      ):
-    if session.exec(select(User).where(User.email == data.email)).first() and user.email != data.email:
+    if session.exec(select(User).where(User.email == data.email)).first() and session.exec(select(User).where(User.email == data.email)).first().id != user.id:
         raise HTTPException(status_code=400, detail='Email is busy')
     if data.password != data.complete_password:
         raise HTTPException(status_code=401, detail='Incorrect password')

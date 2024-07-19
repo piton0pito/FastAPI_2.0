@@ -74,7 +74,7 @@ def get_no_verify_user_xlsx(su_user: User = Depends(verify_access_token), sessio
     return FileResponse(path=f'{name}.xlsx', filename=f'{name}.xlsx', media_type='multipart/form-data')
 
 
-@router.get('/verify_user/{user_id}')
+@router.put('/verify_user/{user_id}')
 def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token),
                        session: Session = Depends(get_session)):
     if su_user.role != 'super_user':
@@ -134,7 +134,7 @@ def del_user(user_id: int, su_user: User = Depends(verify_access_token), session
         raise HTTPException(status_code=404, detail='User not found')
     session.delete(user)
     session.commit()
-    raise HTTPException(status_code=200)
+    raise HTTPException(status_code=204)
 
 
 @router.put('/make_super_user/{user_id}')
@@ -173,10 +173,19 @@ def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token
     raise HTTPException(status_code=200)
 
 
+@router.get('/get_all_cars/')
+def get_all_cars(session: Session = Depends(get_session), su_user: User = Depends(verify_access_token)):
+    if su_user.role != 'super_user':
+        raise HTTPException(status_code=403)
+    return session.exec(select(Car)).all()
+
+
 @router.post('/add_car/')
 def add_car(data: AddCar, session: Session = Depends(get_session), su_user: User = Depends(verify_access_token)):
     if su_user.role != 'super_user':
         raise HTTPException(status_code=403)
+    if session.exec(select(Car).where(Car.car_number == data.car_number)).first():
+        raise HTTPException(status_code=400, detail='The car with this number is already registered')
     car = Car(brand=data.brand,
               model=data.model,
               latitude=data.latitude,
