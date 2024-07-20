@@ -1,0 +1,10 @@
+.venv
+.idea
+app/data_base.db
+app/meme.jpg
+app/no_verify_users.xlsx
+app/verify_users.xlsx
+Docker
+no_verify_users.xlsx
+verify_users.xlsx
+.gitlab-ci.yml

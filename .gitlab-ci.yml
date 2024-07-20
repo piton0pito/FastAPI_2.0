@@ -23,3 +23,9 @@ test:
   dependencies:
     - build_app
     - build_test
+
+deploy-prod:
+  stage: deploy
+  script:
+    - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
+  environment: production
