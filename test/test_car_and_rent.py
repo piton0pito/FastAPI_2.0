@@ -1,5 +1,5 @@
-from app.test.conftest import client
-from app.test.data_for_test import end_rent_data
+from test.conftest import client
+from test.data_for_test import end_rent_data
 
 
 def test_get_cars(add_cars, clear_database):

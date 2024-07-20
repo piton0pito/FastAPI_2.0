@@ -4,13 +4,13 @@ from sqlalchemy import create_engine, delete
 from sqlmodel import Session, SQLModel, select
 from starlette.testclient import TestClient
 
-from app.config import TEST_USER_EMAIL, TEST_USER_PHONE, TEST_USER_FIRST_NAME, TEST_USER_LAST_NAME, TEST_USER_PASSWORD, \
+from app.config import TEST_USER_EMAIL, TEST_USER_FIRST_NAME, TEST_USER_LAST_NAME, TEST_USER_PASSWORD, \
     TEST_USER_LICENSE, TEST_USER_SURNAME, EMAIL_ADMIN, PASS_ADMIN
 from app.db import get_session
 from app.main import app
 from app.models import User, Car, Payment, Rent
 # from app.test.data_for_test import user_1, user_2, admin_1, admin_2, car1, car2, car3
-from app.test.data_for_test import email_data
+from test.data_for_test import email_data
 from app.utils import hash_password
 
 engine = create_engine("sqlite:///./test_data_base.db")

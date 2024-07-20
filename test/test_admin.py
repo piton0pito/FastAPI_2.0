@@ -1,6 +1,6 @@
-from app.config import PASS_ADMIN, EMAIL_ADMIN, TEST_USER_EMAIL
-from app.test.conftest import client
-from app.test.data_for_test import add_car_data
+from app.config import EMAIL_ADMIN, TEST_USER_EMAIL
+from test.conftest import client
+from test.data_for_test import add_car_data
 
 
 def test_create_first_admin(clear_database):

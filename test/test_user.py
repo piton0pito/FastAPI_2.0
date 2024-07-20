@@ -1,7 +1,7 @@
 from app.config import TEST_USER_EMAIL, TEST_USER_PASSWORD
 
-from app.test.conftest import client
-from app.test.data_for_test import login_user_data, reg_user_data, update_user_data, email_data, \
+from test.conftest import client
+from test.data_for_test import login_user_data, reg_user_data, update_user_data, email_data, \
     create_new_password_data
 
 
