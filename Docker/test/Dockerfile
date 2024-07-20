@@ -1,11 +1,11 @@
-# /Docker/app/Dockerfile
+# /Docker/test/Dockerfile
 FROM python:3.11
 
 # Устанавливаем рабочую директорию
-WORKDIR /app
+WORKDIR /test
 
-# Копируем все директории и файлы, кроме /test
-COPY ./app /app
+# Копируем все директории и файлы, кроме /app
+COPY ./test /test
 COPY ./Docker /Docker
 COPY ./.gitlab-ci.yml /.gitlab-ci.yml
 COPY ./docker-compose.yml /docker-compose.yml

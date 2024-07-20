@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Docker/app/Dockerfile
+    container_name: app_container
+    networks:
+      - appnetwork
+
+  test:
+    build:
+      context: .
+      dockerfile: Docker/test/Dockerfile
+    container_name: test_container
+    depends_on:
+      - app
+    networks:
+      - appnetwork
+    links:
+      - app
+
+networks:
+  appnetwork:
+    driver: bridge

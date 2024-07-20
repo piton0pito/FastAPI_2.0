@@ -1,0 +1,25 @@
+stages:
+  - build
+  - test
+
+# Сборка контейнера с приложением
+build_app:
+  stage: build
+  script:
+    - docker-compose build app
+
+# Сборка контейнера с тестами
+build_test:
+  stage: build
+  script:
+    - docker-compose build test
+
+# Запуск тестов
+test:
+  stage: test
+  script:
+    - docker-compose up -d app
+    - docker-compose run test_container
+  dependencies:
+    - build_app
+    - build_test
